@@ -1,0 +1,40 @@
+# Build output
+target/
+build/
+out/
+bin/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Gradle / Maven wrappers keep their jars; ignore caches
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse / VS Code
+.classpath
+.project
+.settings/
+.vscode/
+
+# Logs and temp files
+*.log
+logs/
+*.tmp
+
+# Local environment / secrets (never commit real webhook URLs or SMTP credentials)
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.properties
+
+# OS files
+.DS_Store
+Thumbs.db
