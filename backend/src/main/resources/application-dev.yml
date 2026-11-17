@@ -1,0 +1,7 @@
+# Local development: the PostgreSQL container from development/docker-compose.yml.
+# Defaults match the compose defaults; override with the same variables as in development/.env.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${APP_DB_PORT:5432}/${APP_DB_NAME:alerts}
+    username: ${APP_DB_USER:alerts}
+    password: ${APP_DB_PASSWORD:alerts}

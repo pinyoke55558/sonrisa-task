@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: alerts-backend
+  profiles:
+    default: dev
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    locations: classpath:db/migration
