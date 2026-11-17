@@ -3,6 +3,7 @@ package com.example.alerts.api;
 import com.example.alerts.dto.EventResponse;
 import com.example.alerts.dto.PageResponse;
 import com.example.alerts.service.EventService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Events", description = "Received events, newest first")
 @RestController
 @RequestMapping("/api/events")
 @RequiredArgsConstructor

@@ -4,6 +4,7 @@ import com.example.alerts.dto.RuleResponse;
 import com.example.alerts.dto.RuleSaveRequest;
 import com.example.alerts.dto.RuleUpdateRequest;
 import com.example.alerts.service.RuleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Rules", description = "Alert rules of the signed-in user; /all is ADMIN only and read only")
 @RestController
 @RequestMapping("/api/rules")
 @RequiredArgsConstructor

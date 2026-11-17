@@ -4,6 +4,7 @@ import com.example.alerts.dto.CategoryResponse;
 import com.example.alerts.dto.CategorySaveRequest;
 import com.example.alerts.dto.CategoryUpdateRequest;
 import com.example.alerts.service.CategoryService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Categories", description = "Event categories; changes need ADMIN")
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor

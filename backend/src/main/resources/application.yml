@@ -9,3 +9,9 @@ spring:
     open-in-view: false
   flyway:
     locations: classpath:db/migration
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
