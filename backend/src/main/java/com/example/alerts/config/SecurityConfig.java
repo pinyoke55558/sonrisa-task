@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/rules/**").hasAnyRole(USER, ADMIN)
                         .requestMatchers(HttpMethod.GET, "/api/me").hasAnyRole(USER, ADMIN)
                         .requestMatchers(HttpMethod.GET, "/api/events/**").hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.POST, "/api/simulation/events").hasRole(ADMIN)
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
