@@ -8,6 +8,7 @@ import com.example.alerts.mapper.EventMapper;
 import com.example.alerts.model.Event;
 import com.example.alerts.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
+import java.util.List;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,12 @@ public class EventService {
         return PageResponse.of(
                 eventRepository.findAllByDeletedFalseOrderByOccurredAtDesc(PageRequest.of(page, size)),
                 eventMapper::toResponse);
+    }
+
+    public List<EventResponse> listRecent(int limit) {
+        return eventRepository.findAllByDeletedFalseOrderByCreatedAtDesc(PageRequest.of(0, limit)).stream()
+                .map(eventMapper::toResponse)
+                .toList();
     }
 
     public EventResponse load(Long id) {

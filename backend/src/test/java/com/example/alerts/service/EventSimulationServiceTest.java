@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.example.alerts.dto.EventResponse;
 import com.example.alerts.dto.EventSimulationRequest;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,5 +32,13 @@ class EventSimulationServiceTest {
 
         assertThat(eventSimulationService.simulate(request)).isSameAs(saved);
         verify(eventService).save(request);
+    }
+
+    @Test
+    void listRecentDelegatesToEventService() {
+        List<EventResponse> recent = List.of(new EventResponse(1L, null, "Sent last", null, null, null, null));
+        when(eventService.listRecent(5)).thenReturn(recent);
+
+        assertThat(eventSimulationService.listRecent(5)).isSameAs(recent);
     }
 }

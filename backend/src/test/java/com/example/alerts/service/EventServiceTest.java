@@ -81,6 +81,16 @@ class EventServiceTest {
     }
 
     @Test
+    void listRecentReturnsNewestCreatedEventsUpToLimit() {
+        when(eventRepository.findAllByDeletedFalseOrderByCreatedAtDesc(PageRequest.of(0, 5)))
+                .thenReturn(List.of(event(7L, "Sent last"), event(6L, "Sent before")));
+
+        List<EventResponse> response = eventService.listRecent(5);
+
+        assertThat(response).extracting(EventResponse::title).containsExactly("Sent last", "Sent before");
+    }
+
+    @Test
     void loadReturnsEventWithCategory() {
         when(eventRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(event(1L, "Quake")));
 
