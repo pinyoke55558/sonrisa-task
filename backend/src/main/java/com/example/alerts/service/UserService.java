@@ -33,7 +33,7 @@ public class UserService {
                 .orElseGet(() -> userRepository.saveAndFlush(newUser(jwt)).getId());
     }
 
-    // Not @Transactional: a read-only transaction around currentUserId() would block the first-sign-on insert.
+    // Not @Transactional: a read-only transaction around loadCurrentUserId() would block the first-sign-on insert.
     public UserResponse loadCurrent() {
         Long id = loadCurrentUserId();
         return userRepository.findById(id)
