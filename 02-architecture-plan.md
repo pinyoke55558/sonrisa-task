@@ -39,7 +39,7 @@ Purple = built by us · green = infrastructure we run · gray = users and extern
 | **Spring Boot backend** | REST API for categories, rules and events; the dummy event API (used by admins to simulate incoming events; stands in for a future real source); rule matching; sending notifications. Checks every request's token against Keycloak; never handles passwords. |
 | **Keycloak** | External authentication server (IAM): users, sign-on, roles (user, admin). |
 | **PostgreSQL – application database** | Categories, rules, events and notification results. Only the backend accesses it. |
-| **PostgreSQL – Keycloak database** | Keycloak's own data (users, sessions, settings). A **separate database**, kept apart from the application data. |
+| **PostgreSQL – Keycloak database** | Keycloak's own data (users, sessions, settings). Runs as its **own PostgreSQL instance**, fully separate from the application database. |
 | **Slack / SMTP server** | Receive notifications from the backend. The frontend never talks to them. |
 
 ## 2. Domain Model
@@ -184,3 +184,29 @@ Notification targets are **part of a rule**: they're sent and returned inside th
 - **Slack webhook URLs** are secrets: responses show them masked (`https://hooks.slack.com/…/****`).
 
 ## 4. Technology
+
+Exact library versions are pinned and checked against Maven Central / npm when the project is created, not written from memory.
+
+### 4.1 Stack
+
+| Area | Technology | Used for |
+|---|---|---|
+| **Backend** | **Java 21** + **Spring Boot 4** | REST API, matching, notifications |
+| | Spring Web, Spring Data JPA, Bean Validation | Endpoints, database access, input checks |
+| | **Spring Security** (OAuth2 resource server) | Checking Keycloak tokens, roles `USER` / `ADMIN` |
+| | Spring Mail | Sending email over SMTP |
+| | Spring `RestClient` | Posting to Slack incoming webhooks |
+| | **Lombok** | Less boilerplate (getters, builders, constructors) |
+| | **Flyway** | Versioned database migrations; seeds the two dummy categories |
+| | springdoc-openapi | Generated API docs + Swagger UI (§3) |
+| | **Gradle** (wrapper committed) | Build |
+| **Frontend** | **React** + TypeScript, built with Vite | Web application for users and admins |
+| | OIDC client library (proposed: `react-oidc-context`) | Sign-on with Keycloak, attaching the token to API calls |
+| **Authentication** | **Keycloak** | External authentication server; a realm with test users is imported on startup |
+| **Database** | **PostgreSQL** | Application database. Keycloak uses its **own, separate PostgreSQL instance** (§1) |
+| **Local environment** | Docker Compose | Starts both PostgreSQL instances, Keycloak, Mailpit and the app with one command |
+| | Mailpit | Catches outgoing email locally, with a web UI for checking it |
+| **Testing** | JUnit 5, AssertJ, Mockito | Unit tests |
+| | Testcontainers | Integration tests against a real PostgreSQL |
+| | WireMock | Fake Slack webhook in tests |
+| | spring-security-test | Tests with fake signed-on users and roles |
