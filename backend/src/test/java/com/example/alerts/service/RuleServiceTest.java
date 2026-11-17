@@ -54,12 +54,12 @@ class RuleServiceTest {
     @BeforeEach
     void setUp() {
         RuleMapper mapper = Mappers.getMapper(RuleMapper.class);
-        ruleService = new RuleService(ruleRepository, categoryRepository, targetRepository, mapper, userService);
+        ruleService = new RuleService(mapper, userService, ruleRepository, categoryRepository, targetRepository);
     }
 
     @Test
     void listReturnsOnlyOwnRules() {
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(ruleRepository.findAllByOwnerIdAndDeletedFalseOrderByNameAsc(USER_ID))
                 .thenReturn(List.of(rule(1L, USER_ID, "Earthquakes")));
 
@@ -71,7 +71,7 @@ class RuleServiceTest {
 
     @Test
     void listAllMasksSlackWebhooksOfOtherUsers() {
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(ruleRepository.findAllByDeletedFalseOrderByNameAsc())
                 .thenReturn(List.of(rule(1L, USER_ID, "Mine"), rule(2L, OTHER_USER_ID, "Theirs")));
 
@@ -83,7 +83,7 @@ class RuleServiceTest {
 
     @Test
     void loadOwnRule() {
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(userService.isAdmin()).thenReturn(false);
         when(ruleRepository.findByIdAndOwnerIdAndDeletedFalse(1L, USER_ID)).thenReturn(Optional.of(rule(1L, USER_ID, "Mine")));
 
@@ -92,7 +92,7 @@ class RuleServiceTest {
 
     @Test
     void loadOtherUsersRuleAsUserIsNotFound() {
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(userService.isAdmin()).thenReturn(false);
         when(ruleRepository.findByIdAndOwnerIdAndDeletedFalse(2L, USER_ID)).thenReturn(Optional.empty());
 
@@ -101,7 +101,7 @@ class RuleServiceTest {
 
     @Test
     void loadOtherUsersRuleAsAdminIsMasked() {
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(userService.isAdmin()).thenReturn(true);
         when(ruleRepository.findByIdAndDeletedFalse(2L)).thenReturn(Optional.of(rule(2L, OTHER_USER_ID, "Theirs")));
 
@@ -113,7 +113,7 @@ class RuleServiceTest {
     @Test
     void saveCreatesRuleForCurrentUser() {
         EventCategory category = category(5L, "Dummy A");
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(userService.getReference(USER_ID)).thenReturn(user(USER_ID));
         when(categoryRepository.findAllByIdInAndDeletedFalse(Set.of(5L))).thenReturn(List.of(category));
         when(ruleRepository.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -132,7 +132,7 @@ class RuleServiceTest {
     @Test
     void saveRejectsUnknownCategory() {
         when(categoryRepository.findAllByIdInAndDeletedFalse(Set.of(99L))).thenReturn(List.of());
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
 
         assertThatThrownBy(() -> ruleService.save(new RuleSaveRequest("Quakes", true, Set.of("earthquake"), Set.of(99L),
                 List.of(new TargetRequest(ChannelType.EMAIL, "anna@example.com")))))
@@ -154,7 +154,7 @@ class RuleServiceTest {
     @Test
     void updateReplacesTargetsAndPassesClientVersionToJpa() {
         NotificationTarget oldTarget = target(ChannelType.EMAIL, "old@example.com");
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(ruleRepository.existsByIdAndOwnerIdAndDeletedFalse(1L, USER_ID)).thenReturn(true);
         when(targetRepository.findAllByRuleIdAndDeletedFalse(1L)).thenReturn(List.of(oldTarget));
         when(userService.getReference(USER_ID)).thenReturn(user(USER_ID));
@@ -174,7 +174,7 @@ class RuleServiceTest {
 
     @Test
     void updateOtherUsersRuleIsNotFound() {
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(ruleRepository.existsByIdAndOwnerIdAndDeletedFalse(2L, USER_ID)).thenReturn(false);
 
         assertThatThrownBy(() -> ruleService.update(2L, new RuleUpdateRequest("x", true, Set.of("x"), null,
@@ -186,7 +186,7 @@ class RuleServiceTest {
     @Test
     void deleteMarksRuleAndTargetsAsDeleted() {
         AlertRule rule = rule(1L, USER_ID, "Mine");
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(ruleRepository.findByIdAndOwnerIdAndDeletedFalse(1L, USER_ID)).thenReturn(Optional.of(rule));
 
         ruleService.delete(1L);
@@ -199,7 +199,7 @@ class RuleServiceTest {
 
     @Test
     void deleteOtherUsersRuleIsNotFound() {
-        when(userService.currentUserId()).thenReturn(USER_ID);
+        when(userService.loadCurrentUserId()).thenReturn(USER_ID);
         when(ruleRepository.findByIdAndOwnerIdAndDeletedFalse(2L, USER_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> ruleService.delete(2L)).isInstanceOf(NotFoundException.class);

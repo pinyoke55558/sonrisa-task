@@ -39,20 +39,20 @@ public class RuleService {
     private final NotificationTargetRepository targetRepository;
 
     public List<RuleResponse> list() {
-        return ruleRepository.findAllByOwnerIdAndDeletedFalseOrderByNameAsc(userService.currentUserId()).stream()
+        return ruleRepository.findAllByOwnerIdAndDeletedFalseOrderByNameAsc(userService.loadCurrentUserId()).stream()
                 .map(ruleMapper::toResponse)
                 .toList();
     }
 
     public List<RuleResponse> listAll() {
-        Long userId = userService.currentUserId();
+        Long userId = userService.loadCurrentUserId();
         return ruleRepository.findAllByDeletedFalseOrderByNameAsc().stream()
                 .map(rule -> toResponse(rule, userId))
                 .toList();
     }
 
     public RuleResponse load(Long id) {
-        Long userId = userService.currentUserId();
+        Long userId = userService.loadCurrentUserId();
         return (userService.isAdmin()
                         ? ruleRepository.findByIdAndDeletedFalse(id)
                         : ruleRepository.findByIdAndOwnerIdAndDeletedFalse(id, userId))
@@ -64,7 +64,7 @@ public class RuleService {
     public RuleResponse save(RuleSaveRequest request) {
         validateTargets(request.targets());
         AlertRule rule = ruleMapper.toEntity(request);
-        rule.setOwner(userService.getReference(userService.currentUserId()));
+        rule.setOwner(userService.getReference(userService.loadCurrentUserId()));
         rule.setCategories(resolveCategories(request.categoryIds()));
         request.targets().stream().map(ruleMapper::toTarget).forEach(rule::addTarget);
 
@@ -73,7 +73,7 @@ public class RuleService {
 
     @Transactional
     public RuleResponse update(Long id, RuleUpdateRequest request) {
-        Long userId = userService.currentUserId();
+        Long userId = userService.loadCurrentUserId();
         if (!ruleRepository.existsByIdAndOwnerIdAndDeletedFalse(id, userId)) {
             throw new NotFoundException(RULE, id);
         }
@@ -92,7 +92,7 @@ public class RuleService {
 
     @Transactional
     public void delete(Long id) {
-        AlertRule rule = ruleRepository.findByIdAndOwnerIdAndDeletedFalse(id, userService.currentUserId())
+        AlertRule rule = ruleRepository.findByIdAndOwnerIdAndDeletedFalse(id, userService.loadCurrentUserId())
                 .orElseThrow(() -> new NotFoundException(RULE, id));
 
         rule.setDeleted(true);
