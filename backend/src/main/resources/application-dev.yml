@@ -10,3 +10,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:${KEYCLOAK_PORT:8180}/realms/${KEYCLOAK_REALM:sonrise}
+
+app:
+  cors:
+    allowed-origins: ${FRONTEND_ORIGIN:http://localhost:5173}
