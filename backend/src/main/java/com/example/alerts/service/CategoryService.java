@@ -2,6 +2,7 @@ package com.example.alerts.service;
 
 import com.example.alerts.dto.CategoryResponse;
 import com.example.alerts.exception.NotFoundException;
+import com.example.alerts.mapper.CategoryMapper;
 import com.example.alerts.repository.EventCategoryRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,16 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoryService {
 
     private final EventCategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     public List<CategoryResponse> list() {
         return categoryRepository.findAllByDeletedFalseOrderByNameAsc().stream()
-                .map(CategoryResponse::from)
+                .map(categoryMapper::toResponse)
                 .toList();
     }
 
     public CategoryResponse get(Long id) {
         return categoryRepository.findByIdAndDeletedFalse(id)
-                .map(CategoryResponse::from)
+                .map(categoryMapper::toResponse)
                 .orElseThrow(() -> new NotFoundException("Category", id));
     }
 }
