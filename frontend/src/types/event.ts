@@ -17,3 +17,11 @@ export type PageDto<T> = {
   totalElements: number
   totalPages: number
 }
+
+export type EventSimulationRequest = {
+  categoryId: number | null
+  title: string
+  summary: string | null
+  url: string | null
+  occurredAt: string | null
+}
