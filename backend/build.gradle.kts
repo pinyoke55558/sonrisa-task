@@ -17,13 +17,19 @@ repositories {
 	mavenCentral()
 }
 
+val mapstructVersion = "1.6.3"
+val lombokMapstructBindingVersion = "0.2.0"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.flywaydb:flyway-database-postgresql")
+	implementation("org.mapstruct:mapstruct:$mapstructVersion")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
+	annotationProcessor("org.projectlombok:lombok-mapstruct-binding:$lombokMapstructBindingVersion")
+	annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
 	runtimeOnly("org.postgresql:postgresql")
 	testCompileOnly("org.projectlombok:lombok")
 	testAnnotationProcessor("org.projectlombok:lombok")
