@@ -1,8 +1,7 @@
 # 01 – Requirements: World Event Alerts
 
-> **Status:** Draft v1 (2026-11-17). Not reviewed yet.
+> **Status:** Draft v2 (2026-11-17). MVP scope (§4) agreed.
 > This document describes **what** the system must do and why. **How** it is built is in [02-architecture-plan.md](02-architecture-plan.md).
-> Items marked **[ASSUMPTION]** or **[VERIFY]** still have to be confirmed or corrected.
 
 ---
 
@@ -18,149 +17,118 @@ No further specification, wireframes or schema exist. Everything below is our in
 
 | # | Requirement from the brief | How it is read |
 |---|---|---|
-| R1 | "users … set up alerts" | An authenticated user can create, edit, enable/disable and delete **alert rules** |
-| R2 | "something important happens in the world" | The system **ingests events** from external sources and stores them in one normalized model with a **severity** |
-| R3 | "breaking news, market movements, natural disasters" | At least three **event categories**; at least one fed by a *real* external source |
-| R4 | "get notified" | When an event matches a rule, a **notification** goes to the rule's targets |
+| R1 | "users … set up alerts" | A signed-on user can create, edit, enable/disable and delete **alert rules** |
+| R2 | "something important happens in the world" | The system **receives and stores events** (through a dummy API in the MVP); what is "important" is narrowed to keyword matching (§3) |
+| R3 | "breaking news, market movements, natural disasters" | Event categories are **data, not code**; the MVP ships with two dummy categories (§3.1) |
+| R4 | "get notified" | When an event matches a rule, a **notification** goes to the rule's destinations |
 | R5 | "email and Slack" | Two working channels: email and Slack |
-| R6 | "add more channels later" | Adding a new channel must not require changes to rules, matching or delivery logic |
-| R7 | "admin view" | Admins can see users, rules, ingested events, delivery outcomes and source health, and act on them |
+| R6 | "add more channels later" | Adding a new channel must not require changes to rules, matching or event handling |
+| R7 | "admin view" | Covered by the management functions in §4.1 (categories, rules, events); no dedicated admin UI in the MVP |
 
 ---
 
 ## 3. What "important" means
 
-The brief doesn't define "important", so it is defined in **two layers**:
+The exact meaning of "important" is **unclear and out of scope for the MVP**. The system doesn't score, rank or classify events by importance.
 
-1. **Objective layer (system):** every event gets a normalized **severity**: `LOW(1)`, `MEDIUM(2)`, `HIGH(3)`, `CRITICAL(4)`, derived from the source's raw signal by a documented, source-specific rule.
-2. **Subjective layer (user):** each user decides what matters *to them* through rule criteria (category, minimum severity, keywords, region).
+For the MVP, an event is relevant to a user **only if its content contains at least one of the keywords defined in the user's alert rule**:
 
-So "important" = *the event's severity passes the user's threshold and it matches the user's filters*. That keeps the system out of editorial decisions and lets each user set their own threshold.
+- The "relevant content" is the event's **title and summary**.
+- Keywords are defined ahead of time in the alert rule by the user who owns it, not taken from a global list.
+- Matching is plain text search.
+
+This keeps the system out of editorial decisions. A real definition of importance (severity scoring, thresholds, trend detection) is a future extension (§4.2).
 
 ### 3.1 Event categories
-`NATURAL_DISASTER`, `MARKET`, `NEWS`. A fixed list for the MVP; admins can't add categories at runtime.
 
-### 3.2 Severity mapping (business rules, first draft)
+The exact event categories the application should support are **currently undefined**. They are not hard-coded; they are **stored in the database** so new categories can be added without a code change or redeploy.
 
-| Source | Rule |
-|---|---|
-| Earthquakes (real feed) | magnitude < 4.5 → LOW; 4.5–5.9 → MEDIUM; 6.0–6.9 → HIGH; ≥ 7.0 → CRITICAL **[VERIFY thresholds are reasonable; also check whether the USGS `alert` field (green/yellow/orange/red) is the better signal]** |
-| Market (simulated) | abs(% change) ≥ 2 → MEDIUM; ≥ 5 → HIGH; ≥ 10 → CRITICAL |
-| News (simulated / manual) | severity set by the producer (admin-injected event or fixture) |
+For the MVP and testing, the system ships with **two dummy categories**, seeded on first start:
 
----
-
-## 4. Scope
-
-### 4.1 In scope (MVP)
-- User accounts with roles `USER` and `ADMIN`
-- Self-service management of alert rules and notification targets (per user)
-- Event intake from **1 real** source (natural disasters) + **simulated/manual** sources for news and markets
-- Event normalization, deduplication and storage
-- Rule matching
-- Reliable delivery with retries and a persisted delivery history
-- Email and Slack channels
-- Admin capabilities (§6.6)
-- Runs locally with a single command; automated tests
-
-### 4.2 Out of scope (explicit non-goals)
-- Production-grade news intelligence (NLP, trending detection, source credibility)
-- Real-time market data feeds (paid/licensed; out of scope for 24 h)
-- Slack OAuth app / bot install flow (incoming webhooks are enough to prove the point)
-- Email verification and double opt-in flows (noted as a production gap)
-- Multi-tenancy and horizontal scaling
-- Mobile push, SMS (but adding them must be easy, see R6)
-- A rich front-end SPA
-- Notification digests (one message per event, see A3)
-
----
-
-## 5. Assumptions
-
-| ID | Assumption | Impact if wrong |
+| Code | Name | Description |
 |---|---|---|
-| A1 | **[ASSUMPTION]** "Users" are end users of our product, not just internal staff | Self-service rule management and per-user data isolation are needed either way |
-| A2 | **[ASSUMPTION]** Near real-time (minutes) is enough; second-level latency isn't required | Polling is fine; no streaming infrastructure needed |
-| A3 | **[ASSUMPTION]** One alert per event per target is the expected behaviour; digests are a later feature | Delivery is modeled per message; a digest would need batching |
-| A4 | **[ASSUMPTION]** A single deployed instance is enough for the exercise | Simpler infrastructure; the design should still not break with more than one instance |
-| A5 | **[VERIFY]** The USGS Earthquake Hazards GeoJSON summary feeds are public, keyless and stable (e.g., `…/earthquakes/feed/v1.0/summary/all_hour.geojson`) | If wrong, fall back to GDACS RSS or to a simulated source |
-| A6 | **[VERIFY]** Slack incoming webhooks accept a JSON `{"text": …}` POST and return `200 ok` | The Slack channel and its tests depend on this contract |
-| A7 | **[ASSUMPTION]** No free, keyless, ToS-compliant market data API exists that is reliable enough for a demo | Market source is simulated |
+| `DUMMY_A` | Dummy category A | Placeholder category for testing |
+| `DUMMY_B` | Dummy category B | Placeholder category for testing |
+
+- A category has: a **unique code**, a display name, an optional description, and an active flag.
+- Every event belongs to exactly one category.
+- Categories are managed through CRUD (§4.1, function 1). How deletion works for a category still in use is to be defined later.
 
 ---
 
-## 6. Functional requirements
+## 4. MVP scope
 
-### 6.1 Accounts and roles
-- **FR-1.1** A person can register and log in; passwords are never stored in plain text.
-- **FR-1.2** Two roles: `USER` (manages own rules and targets) and `ADMIN` (everything in §6.6).
-- **FR-1.3** An admin can deactivate a user; a deactivated user receives no notifications.
+### 4.1 In scope
 
-### 6.2 Notification targets
-- **FR-2.1** A user can create, list, update, enable/disable and delete notification targets. A target = channel type + destination (email address or Slack webhook URL) + display name.
-- **FR-2.2** The destination is validated per channel when it's saved (valid email format; Slack URL must start with `https://hooks.slack.com/`).
-- **FR-2.3** A user can send a **test notification** to a target.
-- **FR-2.4** Users can only see and change their own targets.
-
-### 6.3 Alert rules
-- **FR-3.1** A user can create, list, view, update, enable/disable and delete alert rules.
-- **FR-3.2** A rule has: name, categories (empty = any), minimum severity, keywords (optional), region (optional bounding box), and one or more of the user's own targets.
-- **FR-3.3** Users can only see and change their own rules.
-
-### 6.4 Matching semantics
-An event matches a rule when **all** of these hold:
-1. the rule is enabled, and the owning user is active
-2. `event.category ∈ rule.categories` (empty set = any category)
-3. `event.severity ≥ rule.minSeverity`
-4. `rule.keywords` is empty **or** at least one keyword occurs (case-insensitive, whole word) in the title or summary
-5. `rule.region` is empty **or** the event's location lies inside the region (events without a location never match a region-filtered rule)
-6. the event is not older than a staleness window (default 24 h), so the first data load doesn't flood users
-
-### 6.5 Event intake and notifications
-- **FR-5.1** Events are fetched from each source periodically; the same source event is stored only once.
-- **FR-5.2** A failing source must not affect the other sources.
-- **FR-5.3** For every matching (event, rule), each of the rule's enabled targets gets a notification with: title, summary, category, severity, time, link to the source.
-- **FR-5.4** A target receives **at most one** notification per event, even if several of the user's rules match the same event **[DECISION – D007]**.
-- **FR-5.5** Failed sends are retried with growing delays; after a maximum number of attempts the notification is marked as permanently failed. Permanent errors (e.g., invalid address) aren't retried.
-- **FR-5.6** A target receives at most **N notifications per hour** (default 20) to protect against floods **[DECISION – D010]**.
-- **FR-5.7** A user can see their own notification history.
-
-### 6.6 Admin view
-- **FR-6.1** List users; deactivate a user.
-- **FR-6.2** List all rules, filterable by user, category and enabled state.
-- **FR-6.3** List ingested events, filterable by category, severity and date.
-- **FR-6.4** Manually inject an event (the "breaking news" source and the demo path).
-- **FR-6.5** List deliveries, filterable by status and channel; re-queue a permanently failed delivery.
-- **FR-6.6** See source health: last run, last success, last error, events fetched.
-- **FR-6.7** See basic statistics: events per day, deliveries by status and channel.
-- Form of the admin view: REST API first, a simple web page if time allows **[DECISION – D011]**.
-
----
-
-## 7. Non-functional requirements
-
-| ID | Area | Requirement |
+| # | Function | What it covers |
 |---|---|---|
-| NFR-1 | Latency | An event is delivered within a few minutes of appearing at the source (A2) |
-| NFR-2 | Reliability | No notification is lost on app restart; delivery is **at-least-once** (rare duplicates after a crash are acceptable and documented) |
-| NFR-3 | Extensibility | A new channel or event source can be added without changes to rules, matching or delivery logic (R6) |
-| NFR-4 | Security – isolation | Users can't read or change another user's data; covered by negative tests |
-| NFR-5 | Security – secrets | Slack webhook URLs are credentials: masked in responses, never logged; SMTP credentials come from environment variables |
-| NFR-6 | Security – SSRF | Users can't make the server call arbitrary URLs (FR-2.2) |
-| NFR-7 | Observability | Health endpoint; logs traceable by event and delivery ID; counters for events ingested and deliveries sent/failed per channel |
-| NFR-8 | Operability | Whole stack starts locally with one command; configuration through properties/env vars |
-| NFR-9 | Testability | Automated tests at unit and integration level; external systems (feeds, Slack, SMTP) are stubbed in tests |
-| NFR-10 | Time | All timestamps in UTC |
+| 1 | **Category management** | Create, read, update and delete event categories. Seeded with two dummy categories for testing. |
+| 2 | **Rule management** | Create, read, update and delete alert rules (keywords, categories, notification destinations). |
+| 3 | **Event management** | Store and manage events. A **dummy API** simulates incoming events until a real source is defined. |
+| 4 | **Rule matching** | Match each incoming event against the configured rules (keyword occurrence, §3). |
+| 5 | **Notifications** | Notify matching rules' destinations through **Slack** and **email**. |
+| 6 | **Authentication** | Users sign on through an **external authentication server**. The application doesn't manage users itself; it only identifies the signed-on user, so each rule has an owner. |
+
+### 4.2 Out of scope
+
+- User management inside the application: registration, user administration, role management, password handling. All of this belongs to the external authentication server.
+- Defining or measuring "importance" (severity, scoring, ranking)
+- Defining the real event categories
+- Real or simulated external event sources and polling
+- Notification channels other than Slack and email (the design must allow adding them later)
+- A dedicated admin UI, statistics, monitoring dashboards
+- Notification extras: retries, rate limiting, digests, duplicate suppression, test notifications
+- Rule extras: region/geo filtering, staleness windows
+- Social login, multi-tenancy
+- Scaling to multiple instances
 
 ---
 
-## 8. Open requirement decisions
+## 5. Use cases
 
-| ID | Question | Recommendation |
-|---|---|---|
-| D006 | Which real event source? | USGS earthquakes (after verifying A5) |
-| D007 | One notification per (event, target) or per (event, rule, target)? | Per (event, target) |
-| D010 | Flood protection | Simple per-target hourly cap |
-| D011 | Admin view form | REST API first; simple web page if time allows |
+```mermaid
+flowchart LR
+    User["«actor»<br/>User"]
+    Admin["«actor»<br/>Admin"]
+    Admin -- "is a user" --> User
 
-Also still to be checked: assumptions A1–A7 and the severity thresholds in §3.2.
+    subgraph SYS["World Event Alerts (MVP)"]
+        UC1(["UC-1 Sign on"])
+        UC2(["UC-2 View categories"])
+        UC3(["UC-3 Manage categories (CRUD)"])
+        UC4(["UC-4 Manage own rules (CRUD)"])
+        UC5(["UC-5 View events"])
+        UC6(["UC-6 Submit event (dummy API)"])
+        UC7(["UC-7 Match event against rules"])
+        UC8(["UC-8 Send notification"])
+    end
+
+    AUTH[["External authentication server"]]
+    SRC[["Event source"]]
+    SLACK[["Slack"]]
+    MAIL[["Email server"]]
+
+    User --- UC1 & UC2 & UC4 & UC5
+    Admin --- UC3
+    UC1 --- AUTH
+    SRC --- UC6
+    UC6 -. "«include»" .-> UC7
+    UC8 -. "«extend»" .-> UC7
+    UC8 --- SLACK & MAIL
+```
+
+| ID | Use case | Actor(s) | MVP function (§4.1) |
+|---|---|---|---|
+| UC-1 | Sign on | User, Admin; external authentication server | 6 Authentication |
+| UC-2 | View categories | User, Admin | 1 Category management |
+| UC-3 | Manage categories (create, update, delete) | Admin | 1 Category management |
+| UC-4 | Manage own rules (create, read, update, delete) | User, Admin | 2 Rule management |
+| UC-5 | View events | User, Admin | 3 Event management |
+| UC-6 | Submit event through the dummy API | Event source | 3 Event management |
+| UC-7 | Match an event against the rules | System (always part of UC-6) | 4 Rule matching |
+| UC-8 | Send notification via Slack or email | System; Slack, email server (only when UC-7 finds a match) | 5 Notifications |
+
+Notes:
+- **Admin** can do everything a **User** can, plus manage categories. Which user is an admin is decided in the external authentication server, not in the application.
+- **Event source** is the caller of the dummy API. It stands in for a future real source, so replacing it doesn't change the use cases.
+- Diagram notation: Mermaid has no native use case diagram, so this is a flowchart in use case style (rounded = use case, double-bordered = external system).
