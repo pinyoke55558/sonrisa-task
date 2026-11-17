@@ -132,3 +132,19 @@ Notes:
 - **Admin** can do everything a **User** can, plus manage categories. Which user is an admin is decided in the external authentication server, not in the application.
 - **Event source** is the caller of the dummy API. It stands in for a future real source, so replacing it doesn't change the use cases.
 - Diagram notation: Mermaid has no native use case diagram, so this is a flowchart in use case style (rounded = use case, double-bordered = external system).
+
+---
+
+## 6. MVP completion criteria
+
+The MVP is complete when all of the following are met **and shown by automated tests and a short documented demo**:
+
+| # | Area | Done when | Use cases |
+|---|---|---|---|
+| 1 | **Rule management** | A signed-on user can create, list, view, update and delete their own rules (keywords, categories, notification destinations). Invalid input is rejected with a clear error. | UC-4 |
+| 2 | **Category management** | An admin can create, list, view, update and delete categories. The two dummy categories exist after the first start. | UC-2, UC-3 |
+| 3 | **Event simulation** | An event can be submitted through the dummy API, is stored, and can be listed and viewed. | UC-5, UC-6 |
+| 4 | **Notification handling** | An event that matches a rule produces a message at each of the rule's destinations (Slack and/or email). An event that matches no rule sends nothing. The result of each send (sent / failed) is stored. This criterion also covers rule matching (§4.1, function 4). | UC-7, UC-8 |
+| 5 | **Authentication** | Users sign on through the external authentication server. Requests without a valid sign-on are rejected, and a user only sees and changes their own rules. | UC-1 |
+
+Automated tests use stand-ins for Slack and the mail server; the demo may use a real Slack webhook if one is available.
