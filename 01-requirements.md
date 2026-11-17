@@ -20,7 +20,7 @@ No further specification, wireframes or schema exist. Everything below is our in
 | R1 | "users … set up alerts" | A signed-on user can create, edit, enable/disable and delete **alert rules** |
 | R2 | "something important happens in the world" | The system **receives and stores events** (through a dummy API in the MVP); what is "important" is narrowed to keyword matching (§3) |
 | R3 | "breaking news, market movements, natural disasters" | Event categories are **data, not code**; the MVP ships with two dummy categories (§3.1) |
-| R4 | "get notified" | When an event matches a rule, a **notification** goes to the rule's destinations |
+| R4 | "get notified" | When an event matches a rule, a **notification** goes to the rule's notification targets |
 | R5 | "email and Slack" | Two working channels: email and Slack |
 | R6 | "add more channels later" | Adding a new channel must not require changes to rules, matching or event handling |
 | R7 | "admin view" | Covered by the management functions in §4.1 (categories, rules, events); admin functions are part of the same web application (§4.1), not a separate admin UI |
@@ -50,9 +50,9 @@ For the MVP and testing, the system ships with **two dummy categories**, seeded 
 | `DUMMY_A` | Dummy category A | Placeholder category for testing |
 | `DUMMY_B` | Dummy category B | Placeholder category for testing |
 
-- A category has: a **unique code**, a display name, an optional description, and an active flag.
+- A category has: a **unique code**, a display name and an optional description.
 - Every event belongs to exactly one category.
-- Categories are managed through CRUD (§4.1, function 1). How deletion works for a category still in use is to be defined later.
+- Categories are managed through CRUD (§4.1, function 1). Deletion is **logical**: a deleted category is hidden and can't be used for new events or rules, but existing events keep it.
 
 ---
 
@@ -63,10 +63,10 @@ For the MVP and testing, the system ships with **two dummy categories**, seeded 
 | # | Function | What it covers |
 |---|---|---|
 | 1 | **Category management** | Create, read, update and delete event categories. Seeded with two dummy categories for testing. |
-| 2 | **Rule management** | Create, read, update and delete alert rules (keywords, categories, notification destinations). |
+| 2 | **Rule management** | Create, read, update and delete alert rules (keywords, categories, notification targets). A **notification target** is one channel (Slack or email) plus one address (Slack webhook URL or email address); it belongs to one rule and is managed together with it. |
 | 3 | **Event management** | Store and manage events. A **dummy API** simulates incoming events until a real source is defined. |
 | 4 | **Rule matching** | Match each incoming event against the configured rules (keyword occurrence, §3). |
-| 5 | **Notifications** | Notify matching rules' destinations through **Slack** and **email**. |
+| 5 | **Notifications** | Notify matching rules' notification targets through **Slack** and **email**. |
 | 6 | **Authentication** | Users sign on through an **external authentication server**. The application doesn't manage users itself; it only identifies the signed-on user, so each rule has an owner. |
 
 Users and admins work through a **React web application**. Functions 1, 2 and 3 (viewing events) are available through it, and sign-on (function 6) starts from it. Events are submitted through the dummy API, not the web application.
@@ -103,17 +103,16 @@ flowchart LR
         UC6(["UC-6 Submit event (dummy API)"])
         UC7(["UC-7 Match event against rules"])
         UC8(["UC-8 Send notification"])
+        UC9(["UC-9 View all rules"])
     end
 
     AUTH[["External authentication server"]]
-    SRC[["Event source"]]
     SLACK[["Slack"]]
     MAIL[["Email server"]]
 
     User --- UC1 & UC2 & UC4 & UC5
-    Admin --- UC3
+    Admin --- UC3 & UC6 & UC9
     UC1 --- AUTH
-    SRC --- UC6
     UC6 -. "«include»" .-> UC7
     UC8 -. "«extend»" .-> UC7
     UC8 --- SLACK & MAIL
@@ -126,13 +125,14 @@ flowchart LR
 | UC-3 | Manage categories (create, update, delete) | Admin | 1 Category management |
 | UC-4 | Manage own rules (create, read, update, delete) | User, Admin | 2 Rule management |
 | UC-5 | View events | User, Admin | 3 Event management |
-| UC-6 | Submit event through the dummy API | Event source | 3 Event management |
+| UC-6 | Submit event through the dummy API | Admin | 3 Event management |
 | UC-7 | Match an event against the rules | System (always part of UC-6) | 4 Rule matching |
 | UC-8 | Send notification via Slack or email | System; Slack, email server (only when UC-7 finds a match) | 5 Notifications |
+| UC-9 | View all users' rules (read only) | Admin | 2 Rule management |
 
 Notes:
-- **Admin** can do everything a **User** can, plus manage categories. Which user is an admin is decided in the external authentication server, not in the application.
-- **Event source** is the caller of the dummy API. It stands in for a future real source, so replacing it doesn't change the use cases.
+- **Admin** can do everything a **User** can, plus manage categories, submit events and view all users' rules. Which user is an admin is decided in the external authentication server, not in the application.
+- Events are submitted by an **admin** through the dummy API, which stands in for a future real source.
 - Diagram notation: Mermaid has no native use case diagram, so this is a flowchart in use case style (rounded = use case, double-bordered = external system).
 
 ---
@@ -143,10 +143,10 @@ The MVP is complete when all of the following are met **and shown by automated t
 
 | # | Area | Done when | Use cases |
 |---|---|---|---|
-| 1 | **Rule management** | A signed-on user can create, list, view, update and delete their own rules (keywords, categories, notification destinations). Invalid input is rejected with a clear error. | UC-4 |
+| 1 | **Rule management** | A signed-on user can create, list, view, update and delete their own rules (keywords, categories, notification targets). Invalid input is rejected with a clear error. | UC-4 |
 | 2 | **Category management** | An admin can create, list, view, update and delete categories. The two dummy categories exist after the first start. | UC-2, UC-3 |
 | 3 | **Event simulation** | An event can be submitted through the dummy API, is stored, and can be listed and viewed. | UC-5, UC-6 |
-| 4 | **Notification handling** | An event that matches a rule produces a message at each of the rule's destinations (Slack and/or email). An event that matches no rule sends nothing. The result of each send (sent / failed) is stored. This criterion also covers rule matching (§4.1, function 4). | UC-7, UC-8 |
+| 4 | **Notification handling** | An event that matches a rule produces a message at each of the rule's notification targets (Slack and/or email). An event that matches no rule sends nothing. The result of each send (sent / failed) is stored. This criterion also covers rule matching (§4.1, function 4). | UC-7, UC-8 |
 | 5 | **Authentication** | Users sign on through the external authentication server. Requests without a valid sign-on are rejected, and a user only sees and changes their own rules. | UC-1 |
 
 Automated tests use stand-ins for Slack and the mail server; the demo may use a real Slack webhook if one is available.
