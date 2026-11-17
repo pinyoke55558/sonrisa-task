@@ -36,6 +36,11 @@ public class CategoryService {
                 .orElseThrow(() -> new NotFoundException("Category", id));
     }
 
+    public EventCategory loadEntity(Long id) {
+        return categoryRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Category", id));
+    }
+
     @Transactional
     public CategoryResponse save(CategorySaveRequest request) {
         if (categoryRepository.existsByCodeAndDeletedFalse(request.code())) {

@@ -2,10 +2,14 @@ package com.example.alerts.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.alerts.dto.CategoryResponse;
 import com.example.alerts.dto.EventResponse;
+import com.example.alerts.dto.EventSimulationRequest;
 import com.example.alerts.dto.PageResponse;
 import com.example.alerts.exception.NotFoundException;
 import com.example.alerts.mapper.CategoryMapper;
@@ -20,8 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -32,7 +38,11 @@ class EventServiceTest {
     private static final Instant OCCURRED = Instant.parse("2026-11-17T14:30:00Z");
 
     @Mock
+    private CategoryService categoryService;
+    @Mock
     private EventRepository eventRepository;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     private EventService eventService;
 
@@ -40,7 +50,7 @@ class EventServiceTest {
     void setUp() {
         EventMapper eventMapper = Mappers.getMapper(EventMapper.class);
         ReflectionTestUtils.setField(eventMapper, "categoryMapper", Mappers.getMapper(CategoryMapper.class));
-        eventService = new EventService(eventMapper, eventRepository);
+        eventService = new EventService(eventMapper, categoryService, eventRepository, eventPublisher);
     }
 
     @Test
@@ -88,6 +98,40 @@ class EventServiceTest {
         assertThatThrownBy(() -> eventService.load(9L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("Event 9 not found");
+    }
+
+    @Test
+    void saveStoresEventWithCategory() {
+        when(categoryService.loadEntity(5L)).thenReturn(event(0L, "unused").getCategory());
+        when(eventRepository.saveAndFlush(any())).thenAnswer(invocation -> {
+            Event saved = invocation.getArgument(0);
+            saved.setId(1L);
+            return saved;
+        });
+
+        EventResponse response = eventService.save(new EventSimulationRequest(
+                5L, "Strong earthquake", "A magnitude 6.8 earthquake was recorded.", "https://example.com/1", OCCURRED));
+
+        ArgumentCaptor<Event> saved = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).saveAndFlush(saved.capture());
+        assertThat(saved.getValue().getCategory().getId()).isEqualTo(5L);
+        assertThat(saved.getValue().getTitle()).isEqualTo("Strong earthquake");
+        assertThat(saved.getValue().getSummary()).isEqualTo("A magnitude 6.8 earthquake was recorded.");
+        assertThat(saved.getValue().getUrl()).isEqualTo("https://example.com/1");
+        assertThat(saved.getValue().getOccurredAt()).isEqualTo(OCCURRED);
+        assertThat(response.id()).isEqualTo(1L);
+        assertThat(response.category().code()).isEqualTo("DUMMY_A");
+        verify(eventPublisher).publishEvent(new EventSavedEvent(1L));
+    }
+
+    @Test
+    void saveWithUnknownOrDeletedCategoryIsNotFound() {
+        when(categoryService.loadEntity(9L)).thenThrow(new NotFoundException("Category", 9L));
+
+        assertThatThrownBy(() -> eventService.save(new EventSimulationRequest(9L, "Title", null, null, OCCURRED)))
+                .isInstanceOf(NotFoundException.class);
+        verify(eventRepository, never()).saveAndFlush(any());
+        verify(eventPublisher, never()).publishEvent(any(Object.class));
     }
 
     private static Event event(Long id, String title) {

@@ -16,4 +16,6 @@ public interface AlertRuleRepository extends JpaRepository<AlertRule, Long> {
     List<AlertRule> findAllByDeletedFalseOrderByNameAsc();
 
     Optional<AlertRule> findByIdAndDeletedFalse(Long id);
+
+    List<AlertRule> findAllByEnabledTrueAndDeletedFalse();
 }

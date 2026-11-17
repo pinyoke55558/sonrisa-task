@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EventSimulationService {
 
+    private final EventService eventService;
+
     public EventResponse simulate(EventSimulationRequest request) {
-        throw new UnsupportedOperationException("Event simulation is not implemented yet.");
+        return eventService.save(request);
     }
 }

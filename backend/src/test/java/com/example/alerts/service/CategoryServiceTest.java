@@ -78,6 +78,21 @@ class CategoryServiceTest {
     }
 
     @Test
+    void loadEntityReturnsCategory() {
+        EventCategory existing = category(1L, "DUMMY_A", "Alpha", 0L);
+        when(categoryRepository.findByIdAndDeletedFalse(1L)).thenReturn(Optional.of(existing));
+
+        assertThat(categoryService.loadEntity(1L)).isSameAs(existing);
+    }
+
+    @Test
+    void loadEntityUnknownOrDeletedCategoryIsNotFound() {
+        when(categoryRepository.findByIdAndDeletedFalse(9L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> categoryService.loadEntity(9L)).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
     void saveStoresNewCategory() {
         when(categoryRepository.existsByCodeAndDeletedFalse("DUMMY_A")).thenReturn(false);
         when(categoryRepository.saveAndFlush(any())).thenAnswer(invocation -> {

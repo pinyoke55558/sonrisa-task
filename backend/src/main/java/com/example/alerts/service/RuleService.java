@@ -51,6 +51,10 @@ public class RuleService {
                 .toList();
     }
 
+    public List<AlertRule> listMatchable() {
+        return ruleRepository.findAllByEnabledTrueAndDeletedFalse();
+    }
+
     public RuleResponse load(Long id) {
         Long userId = userService.loadCurrentUserId();
         return (userService.isAdmin()
