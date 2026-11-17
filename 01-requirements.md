@@ -23,7 +23,7 @@ No further specification, wireframes or schema exist. Everything below is our in
 | R4 | "get notified" | When an event matches a rule, a **notification** goes to the rule's destinations |
 | R5 | "email and Slack" | Two working channels: email and Slack |
 | R6 | "add more channels later" | Adding a new channel must not require changes to rules, matching or event handling |
-| R7 | "admin view" | Covered by the management functions in §4.1 (categories, rules, events); no dedicated admin UI in the MVP |
+| R7 | "admin view" | Covered by the management functions in §4.1 (categories, rules, events); admin functions are part of the same web application (§4.1), not a separate admin UI |
 
 ---
 
@@ -69,6 +69,8 @@ For the MVP and testing, the system ships with **two dummy categories**, seeded 
 | 5 | **Notifications** | Notify matching rules' destinations through **Slack** and **email**. |
 | 6 | **Authentication** | Users sign on through an **external authentication server**. The application doesn't manage users itself; it only identifies the signed-on user, so each rule has an owner. |
 
+Users and admins work through a **React web application**. Functions 1, 2 and 3 (viewing events) are available through it, and sign-on (function 6) starts from it. Events are submitted through the dummy API, not the web application.
+
 ### 4.2 Out of scope
 
 - User management inside the application: registration, user administration, role management, password handling. All of this belongs to the external authentication server.
@@ -76,7 +78,7 @@ For the MVP and testing, the system ships with **two dummy categories**, seeded 
 - Defining the real event categories
 - Real or simulated external event sources and polling
 - Notification channels other than Slack and email (the design must allow adding them later)
-- A dedicated admin UI, statistics, monitoring dashboards
+- A separate admin application, statistics, monitoring dashboards
 - Notification extras: retries, rate limiting, digests, duplicate suppression, test notifications
 - Rule extras: region/geo filtering, staleness windows
 - Social login, multi-tenancy
@@ -137,7 +139,7 @@ Notes:
 
 ## 6. MVP completion criteria
 
-The MVP is complete when all of the following are met **and shown by automated tests and a short documented demo**:
+The MVP is complete when all of the following are met **and shown by automated tests and a short documented demo**. Criteria 1, 2, 3 (listing and viewing events) and 5 are usable through the web application (§4.1):
 
 | # | Area | Done when | Use cases |
 |---|---|---|---|
