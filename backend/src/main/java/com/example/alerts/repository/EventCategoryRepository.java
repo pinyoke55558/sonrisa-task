@@ -1,6 +1,7 @@
 package com.example.alerts.repository;
 
 import com.example.alerts.model.EventCategory;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,8 @@ public interface EventCategoryRepository extends JpaRepository<EventCategory, Lo
     Optional<EventCategory> findByIdAndDeletedFalse(Long id);
 
     boolean existsByIdAndDeletedFalse(Long id);
+
+    List<EventCategory> findAllByIdInAndDeletedFalse(Collection<Long> ids);
 
     boolean existsByCodeAndDeletedFalse(String code);
 
