@@ -1,4 +1,4 @@
-# Local development: the PostgreSQL and Keycloak containers from development/docker-compose.yml.
+# Local development: the PostgreSQL, Keycloak and Mailpit containers from development/docker-compose.yml.
 # Defaults match the compose defaults; override with the same variables as in development/.env.
 spring:
   datasource:
@@ -10,7 +10,14 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:${KEYCLOAK_PORT:8180}/realms/${KEYCLOAK_REALM:sonrise}
+  mail:
+    host: localhost
+    port: ${MAILPIT_SMTP_PORT:1025}
 
 app:
   cors:
     allowed-origins: ${FRONTEND_ORIGIN:http://localhost:5173}
+  notification:
+    mail:
+      from: ${MAIL_FROM:alerts@localhost}
+      time-format: "yyyy-MM-dd HH:mm 'UTC'"
