@@ -48,3 +48,22 @@ The final solution should be chosen based on:
 | Explainability | Can we tell the user *why* a rule was triggered? |
 | Performance | Is evaluation fast enough for the expected event volume? |
 | Operational cost | What do evaluations cost per event, and at scale? |
+
+---
+
+## 3. Matching and notification behaviour under load
+
+**Current state:** after an event is saved and the transaction commits, matching runs asynchronously on a small thread pool (`matchingExecutor`: 2 core threads, at most 4, a queue of 100). For each matched rule, `NotificationService` sends the email or Slack message synchronously on that same thread, inside the matching transaction, one target after another. When all 4 threads are busy and the queue is full, new matching tasks are rejected. The rejection is only logged: the event stays saved, but it is never matched and no notifications are sent.
+
+**Risk:** a slow or unavailable mail server or Slack API holds a matching thread and a database connection for the whole duration of the call. With slow delivery, throughput drops to a few events per second, the queue fills up, and events start to be dropped silently. The queue is held in memory, so pending tasks are also lost on restart.
+
+**Recommendation:** load test the matching and notification flow and decide how it should behave under pressure.
+
+Points to settle:
+
+- **Measure:** event throughput, queue length and rejected tasks with normal and with artificially slow notifiers (for example a mocked SMTP server or Slack endpoint with added latency or timeouts).
+- **Timeouts:** set explicit connect and read timeouts on the mail and Slack clients so that one slow call can't hold a thread indefinitely.
+- **No silent loss:** at minimum, use a `CallerRunsPolicy` on the executor so that overflow slows down the caller instead of dropping events.
+- **Decouple sending from matching:** save notifications as `PENDING` in the matching transaction, and send them separately (own executor or scheduled job), outside the database transaction, with retries for failed deliveries.
+- **Durability:** if events must never be lost, even on restart, replace the in-memory queue with an outbox table or a message broker.
+- **Monitoring:** expose executor metrics (active threads, queue size, rejections) and notification failure counts through Actuator.
