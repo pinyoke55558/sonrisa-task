@@ -11,5 +11,9 @@ public interface EventCategoryRepository extends JpaRepository<EventCategory, Lo
 
     Optional<EventCategory> findByIdAndDeletedFalse(Long id);
 
+    boolean existsByIdAndDeletedFalse(Long id);
+
     boolean existsByCodeAndDeletedFalse(String code);
+
+    boolean existsByCodeAndDeletedFalseAndIdNot(String code, Long id);
 }
