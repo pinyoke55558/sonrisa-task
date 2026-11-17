@@ -1,4 +1,5 @@
 import { EmptyState, PageLayout, Section } from '../components/layout/PageLayout'
+import { Button } from '../components/ui/Button'
 
 export function CategoriesPage() {
   return (
@@ -6,9 +7,7 @@ export function CategoriesPage() {
       <Section
         title="Categories"
         actions={
-          <button type="button" className="button primary small">
-            New category
-          </button>
+          <Button variant="primary" size="small">New category</Button>
         }
       >
         <EmptyState message="No categories yet." />

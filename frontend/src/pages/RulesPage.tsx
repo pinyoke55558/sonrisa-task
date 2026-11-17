@@ -1,4 +1,5 @@
 import { EmptyState, PageLayout, Section } from '../components/layout/PageLayout'
+import { Button } from '../components/ui/Button'
 
 export function RulesPage() {
   return (
@@ -6,9 +7,7 @@ export function RulesPage() {
       <Section
         title="Rules"
         actions={
-          <button type="button" className="button primary small">
-            New rule
-          </button>
+          <Button variant="primary" size="small">New rule</Button>
         }
       >
         <EmptyState message="You have no rules yet." />

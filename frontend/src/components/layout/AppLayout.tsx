@@ -5,9 +5,9 @@ export function AppLayout() {
   const isAdmin = true
 
   return (
-    <div className="app">
+    <div className="grid min-h-screen grid-cols-[220px_1fr]">
       <Sidebar isAdmin={isAdmin} onSignOut={() => undefined} />
-      <main className="main">
+      <main className="bg-white px-6 py-5">
         <Outlet />
       </main>
     </div>
