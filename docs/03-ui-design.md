@@ -2,13 +2,13 @@
 
 A simple design to give a general idea of what the application looks like. These are mockups, not final screens: colors, spacing and wording will change during implementation.
 
-The images are generated from the HTML sources in [docs/ui/](docs/ui/), so they can be regenerated after a change.
+The images are generated from the HTML sources in [ui/](ui/), so they can be regenerated after a change.
 
 ---
 
 ## 1. Login page
 
-![Login page](docs/ui/01-login.png)
+![Login page](ui/01-login.png)
 
 - The login page is **Keycloak's own page**, not part of our application. Our app redirects the user there and receives a token after a successful sign-in, so it never handles passwords (requirements §4.1, function 6).
 - It has a username field, a password field and a sign-in button. Keycloak's page can be styled to match the application.
@@ -17,7 +17,7 @@ The images are generated from the HTML sources in [docs/ui/](docs/ui/), so they 
 
 ## 2. Navigation menu and page layout
 
-![Page layout, shown on the My rules page](docs/ui/02-page-layout.png)
+![Page layout, shown on the My rules page](ui/02-page-layout.png)
 
 ### Navigation menu
 
@@ -46,7 +46,7 @@ The table columns and form fields depend on the page. On the rules page, notific
 
 ## 3. Event simulation page
 
-![Event simulation page](docs/ui/03-event-simulation.png)
+![Event simulation page](ui/03-event-simulation.png)
 
 - **Admin only.** Sends an event through the dummy API (UC-6).
 - Form fields: category, occurred at, title, summary, optional link.
