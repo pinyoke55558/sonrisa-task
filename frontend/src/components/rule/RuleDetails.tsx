@@ -1,18 +1,9 @@
-import type { ReactNode } from 'react'
 import type { RuleDto } from '../../types/rule'
 import { CHANNEL_LABEL, formatCategories } from '../../utils/ruleColumns'
 import { Section } from '../layout/PageLayout'
 import { Button } from '../ui/Button'
+import { Detail } from '../ui/Detail'
 import { StatusPill } from './StatusPill'
-
-function Detail({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div>
-      <dt className="mb-0.5 text-xs text-muted">{label}</dt>
-      <dd className="m-0 text-[13px]">{children}</dd>
-    </div>
-  )
-}
 
 type RuleDetailsProps = {
   rule: RuleDto
