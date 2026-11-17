@@ -88,7 +88,7 @@ class UserServiceTest {
 
     @Test
     void loadCurrentReturnsUserWithApplicationRolesOnly() {
-        signIn("ROLE_USER", "ROLE_ADMIN", "ROLE_OFFLINE_ACCESS", "ROLE_DEFAULT-ROLES-SONRISE");
+        signIn("ROLE_USER", "ROLE_ADMIN", "ROLE_OFFLINE_ACCESS", "ROLE_DEFAULT-ROLES-SONRISA");
         User existing = new User();
         existing.setId(7L);
         existing.setEmail("anna@example.com");
