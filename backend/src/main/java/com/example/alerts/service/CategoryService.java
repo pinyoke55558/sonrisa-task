@@ -58,4 +58,13 @@ public class CategoryService {
         EventCategory category = categoryMapper.toEntity(id, request);
         return categoryMapper.toResponse(categoryRepository.saveAndFlush(category));
     }
+
+    @Transactional
+    public void delete(Long id) {
+        EventCategory category = categoryRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new NotFoundException("Category", id));
+
+        category.setDeleted(true);
+        categoryRepository.saveAndFlush(category);
+    }
 }
