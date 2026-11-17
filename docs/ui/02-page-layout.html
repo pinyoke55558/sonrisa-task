@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Page layout (My rules)</title><link rel="stylesheet" href="mockup.css"></head>
+<body>
+<div class="browser">
+  <div class="address"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">localhost:5173/rules</span></div>
+  <div class="app">
+    <nav class="nav">
+      <div class="brand">World Event Alerts</div>
+      <a class="on" href="#">My rules</a>
+      <a href="#">Events</a>
+      <a href="#">Categories</a>
+      <div class="group">Admin</div>
+      <a href="#">Simulate event</a>
+      <a href="#">All rules</a>
+      <div class="spacer"></div>
+      <a href="#">Sign out</a>
+    </nav>
+    <main class="main">
+      <div class="header">
+        <div><h1>My rules</h1><p>Get notified when an event contains your keywords</p></div>
+        <span class="user">anna.smith · admin</span>
+      </div>
+
+      <div class="toolbar"><h2>Rules</h2><button class="primary small">New rule</button></div>
+      <table>
+        <tr><th style="width:24%">Name</th><th style="width:30%">Keywords</th><th style="width:22%">Categories</th><th style="width:14%">Targets</th><th>Status</th></tr>
+        <tr class="selected"><td>Earthquakes</td><td>earthquake, tsunami</td><td>Dummy category A</td><td>Slack, email</td><td><span class="pill">Enabled</span></td></tr>
+        <tr><td>Market drops</td><td>crash, plunge</td><td>Any</td><td>Email</td><td><span class="pill">Enabled</span></td></tr>
+        <tr><td>Storms</td><td>hurricane, storm</td><td>Dummy category B</td><td>Slack</td><td><span class="pill off">Disabled</span></td></tr>
+      </table>
+
+      <div class="section">
+        <h2>Edit rule</h2>
+        <div class="grid">
+          <div><label>Name</label><input value="Earthquakes"></div>
+          <div><label>Categories (empty = any)</label><select><option>Dummy category A</option><option>Dummy category B</option></select></div>
+          <div class="full"><label>Keywords (at least one)</label><input value="earthquake, tsunami"></div>
+          <div class="full"><label>Notification targets</label>
+            <div class="targets">
+              <div class="target"><select><option>Slack</option></select><input value="https://hooks.slack.com/services/…/****"><button class="small">Remove</button></div>
+              <div class="target"><select><option>Email</option></select><input value="anna.smith@example.com"><button class="small">Remove</button></div>
+              <div><button class="small">Add target</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="actions"><button>Delete</button><button>Cancel</button><button class="primary">Save rule</button></div>
+      </div>
+    </main>
+  </div>
+</div>
+</body></html>

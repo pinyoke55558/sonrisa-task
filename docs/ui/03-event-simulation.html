@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Event simulation</title><link rel="stylesheet" href="mockup.css"></head>
+<body>
+<div class="browser">
+  <div class="address"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">localhost:5173/simulate</span></div>
+  <div class="app">
+    <nav class="nav">
+      <div class="brand">World Event Alerts</div>
+      <a href="#">My rules</a>
+      <a href="#">Events</a>
+      <a href="#">Categories</a>
+      <div class="group">Admin</div>
+      <a class="on" href="#">Simulate event</a>
+      <a href="#">All rules</a>
+      <div class="spacer"></div>
+      <a href="#">Sign out</a>
+    </nav>
+    <main class="main">
+      <div class="header">
+        <div><h1>Simulate event</h1><p>Send a test event through the dummy API. Rules that match it notify their targets.</p></div>
+        <span class="user">anna.smith · admin</span>
+      </div>
+
+      <div class="grid">
+        <div><label>Category</label><select><option>Dummy category A</option><option>Dummy category B</option></select></div>
+        <div><label>Occurred at</label><input value="2026-11-17 14:30 UTC"></div>
+        <div class="full"><label>Title</label><input value="Strong earthquake reported near the coast"></div>
+        <div class="full"><label>Summary</label><textarea>A magnitude 6.8 earthquake was recorded. A tsunami warning has been issued for the coastal region.</textarea></div>
+        <div class="full"><label>Link (optional)</label><input placeholder="https://example.com/news/123"></div>
+      </div>
+      <div class="actions"><button>Clear</button><button class="primary">Send event</button></div>
+
+      <div class="section">
+        <div class="toolbar"><h2>Recently sent</h2></div>
+        <table>
+          <tr><th style="width:52%">Title</th><th style="width:22%">Category</th><th>Occurred at</th></tr>
+          <tr><td>Strong earthquake reported near the coast</td><td>Dummy category A</td><td>2026-11-17 14:30 UTC</td></tr>
+          <tr><td>Local football results</td><td>Dummy category B</td><td>2026-11-17 13:05 UTC</td></tr>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+</body></html>
