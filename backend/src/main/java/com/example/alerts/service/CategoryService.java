@@ -23,7 +23,7 @@ public class CategoryService {
                 .toList();
     }
 
-    public CategoryResponse get(Long id) {
+    public CategoryResponse load(Long id) {
         return categoryRepository.findByIdAndDeletedFalse(id)
                 .map(categoryMapper::toResponse)
                 .orElseThrow(() -> new NotFoundException("Category", id));

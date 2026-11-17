@@ -22,7 +22,7 @@ public class CategoryApi {
     }
 
     @GetMapping("/{id}")
-    public CategoryResponse get(@PathVariable Long id) {
-        return categoryService.get(id);
+    public CategoryResponse load(@PathVariable Long id) {
+        return categoryService.load(id);
     }
 }
